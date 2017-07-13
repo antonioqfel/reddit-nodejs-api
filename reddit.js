@@ -8,7 +8,7 @@ class RedditAPI {
 
     createUser(user) {
         /*
-        first we have to hash the password. we will learn about hashing next week.
+        First we have to hash the password. we will learn about hashing next week.
         the goal of hashing is to store a digested version of the password from which
         it is infeasible to recover the original password, but which can still be used
         to assess with great confidence whether a provided password is the correct one or not
@@ -35,7 +35,7 @@ class RedditAPI {
         return this.conn.query(
             `
             INSERT INTO posts (userId, title, url, createdAt, updatedAt)
-            VALUES (?, ?, ?, NOW(). NOW())`,
+            VALUES (?, ?, ?, NOW(), NOW())`,
             [post.userId, post.title, post.url]
         )
             .then(result => {
@@ -45,7 +45,7 @@ class RedditAPI {
 
     getAllPosts() {
         /*
-        strings delimited with ` are an ES2015 feature called "template strings".
+        Strings delimited with ` are an ES2015 feature called "template strings".
         they are more powerful than what we are using them for here. one feature of
         template strings is that you can write them on multiple lines. if you try to
         skip a line in a single- or double-quoted string, you would get a syntax error.
@@ -60,6 +60,31 @@ class RedditAPI {
             ORDER BY createdAt DESC
             LIMIT 25`
         );
+    }
+
+    createSubreddit(subreddit) {
+        /*
+        Function takes a subreddit object that contains a 'name' and 'description',
+        inserts the new subreddit and return the ID of the new subreddit.
+         */
+        return this.conn.query(
+            `
+            INSERT INTO subreddit (name, description)
+            VALUES (?, ?, )`,
+            [subreddit.name, subreddit.description]
+        )
+            .then(result => {
+                return result.insertId;
+            })
+            .catch(error => {
+                // Special error handling for duplicate entry
+                if (error.code === 'ER_DUP_ENTRY') {
+                    throw new Error('A subreddit with this name already exists');
+                }
+                else {
+                    throw error;
+                }
+            });
     }
 }
 
