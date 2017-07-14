@@ -1,5 +1,3 @@
-'use strict';
-
 var bcrypt = require('bcrypt-as-promised');
 var HASH_ROUNDS = 10;
 
@@ -17,7 +15,7 @@ class RedditAPI {
          */
         return bcrypt.hash(user.password, HASH_ROUNDS)
             .then(hashedPassword => {
-                return this.conn.query('INSERT INTO users (username, password) VALUES (?, ?)', [user.username, hashedPassword]);
+                return this.conn.query('INSERT INTO users (username,password, createdAt, updatedAt) VALUES (?, ?, NOW(), NOW())', [user.username, hashedPassword]);
             })
             .then(result => {
                 return result.insertId;
@@ -44,14 +42,17 @@ class RedditAPI {
 
         return this.conn.query(
             `
-            INSERT INTO posts (userId, title, url, subredditId)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO posts (userId, title, url, subredditId, createdAt, updatedAt)
+            VALUES (?, ?, ?, ?, NOW(), NOW())
             `,
             [post.userId, post.title, post.url, post.subredditId]
         )
             .then(result => {
                 return result.insertId;
-            });
+            })
+            .catch(function () {
+                throw new Error('MySQL error');
+            })
 
     } // createPost ends
 
@@ -82,8 +83,8 @@ class RedditAPI {
          */
         return this.conn.query(
             `
-            INSERT INTO subreddits (name, description)
-            VALUES (?, ?)`,
+            INSERT INTO subreddits (name, description, createdAt, updatedAt)
+            VALUES (?, ?, NOW(), NOW())`,
             [subreddit.name, subreddit.description]
         )
             .then(result => {
@@ -140,23 +141,12 @@ class RedditAPI {
         )
         .then(result => {
             return result.insertId;
-        });
+        })
+        .catch(function () {
+            throw new Error('MySQL error');
+        })
 
     } // createdComment ends
-
-
-    getCommentsForPost(postId) {
-
-
-        return this.conn.query(
-            `
-            SELECT id, parentId, text, createdAt, updatedAt
-            FROM comments
-            WHERE postId = ?
-            `, [postId]
-        );
-
-    } // getCommentsForPost ends
 
 
 } // class RedditAPI ends
