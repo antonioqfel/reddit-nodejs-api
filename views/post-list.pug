@@ -1,0 +1,10 @@
+extends layout.pug
+block content
+    div(id='post')
+        h1='List of posts'
+        ul(class='google.com')
+            each val in posts
+                li(class=val.postId)
+                    h2(class='post-item__title')
+                        a(href=val.url) #{val.title}
+                    p= 'Created by' + val.username

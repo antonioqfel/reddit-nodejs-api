@@ -135,4 +135,4 @@ function crawl() {
         });
 }
 
-//crawl();
+crawl();
